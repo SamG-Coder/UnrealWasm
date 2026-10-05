@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {serve} from '../../scripts/serve.mjs';
+import {chromium} from 'file:///D:/cuda-webshader/node_modules/playwright/index.mjs';
+const {server,origin}=await serve();
+const report={date:new Date().toISOString(),fullEngine:false,checks:[]};
+let browser;
+try {
+ browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:false});
+ report.browser=browser.version();
+ const page=await browser.newPage();
+ await page.goto(origin+'/engine-runtime/test.html');
+ await page.evaluate(async()=>{
+   document.body.innerHTML='<canvas id="canvas" width="640" height="360" style="display:block;margin:20px"></canvas><input id="outside">';
+   globalThis.events=[];
+   const {default:create}=await import('/engine-host/host.mjs');
+   globalThis.host=await create({canvas:document.querySelector('#canvas')});
+ });
+ assert.equal(await page.evaluate(()=>host._host_init()),1);
+ assert.equal(await page.evaluate(()=>host._host_resize(800,450)),1);
+ assert.equal(await page.evaluate(()=>host._host_resize(0,450)),0);
+ await page.evaluate(()=>host._host_style());
+ assert.equal(await page.title(),'WebCuda host validation');
+ assert.deepEqual(await page.locator('#canvas').evaluate(c=>[c.width,c.height,c.style.cursor]),[800,450,'crosshair']);
+ report.checks.push('canvas initialize, resize validation, title and cursor');
+ await page.locator('#canvas').click({position:{x:60,y:50}});
+ await page.keyboard.type('a');
+ await page.keyboard.press('ShiftRight');
+ await page.mouse.wheel(0,100);
+ await page.mouse.down();
+ await page.mouse.move(900,500);
+ await page.mouse.up();
+ await page.locator('#outside').focus();
+ const events=await page.evaluate(()=>{while(host._host_poll()>=0){}return globalThis.events;});
+ for(const kind of [0,1,2,3,4,5,6,7,8,9])assert.ok(events.some(e=>e.kind===kind),'Missing event '+kind);
+ assert.ok(events.some(e=>e.kind===1&&e.x===60&&e.y===50),'Canvas-relative mouse coordinates');
+ assert.equal(events.filter(e=>e.kind===2).length,2,'Release outside canvas is delivered');
+ assert.ok(events.some(e=>e.kind===6&&e.a===97),'Character input');
+ assert.ok(events.some(e=>e.kind===4&&e.a===161)&&events.some(e=>e.kind===5&&e.a===161),'Right modifier mapping');
+ report.checks.push('mouse, outside release, wheel, keyboard, character, focus reset');
+ assert.equal(await page.evaluate(()=>host._host_begin()),1);
+ await page.waitForFunction(()=>host._host_frames()===5);
+ await page.waitForTimeout(100);
+ assert.equal(await page.evaluate(()=>host._host_frames()),5);
+ assert.equal(await page.evaluate(()=>host._host_begin()),1);
+ await page.evaluate(()=>host._host_stop());
+ const stopped=await page.evaluate(()=>host._host_frames());
+ await page.waitForTimeout(100);
+ assert.equal(await page.evaluate(()=>host._host_frames()),stopped);
+ report.checks.push('five ordered RAF callbacks, natural stop, explicit stop, restart');
+ await page.evaluate(()=>host._host_shutdown());
+ await page.locator('#canvas').click();
+ assert.equal(await page.evaluate(()=>host._host_poll()),-1);
+ assert.equal(await page.evaluate(()=>host._host_init()),1);
+ report.checks.push('callback cleanup and reinitialization');
+ report.passed=true;
+}catch(error){report.passed=false;report.error=error.stack;process.exitCode=1;}
+finally{
+ report.wasmSHA256=createHash('sha256').update(await readFile(new URL('../artifacts/browser-host/host.wasm',import.meta.url))).digest('hex');
+ await writeFile(new URL('../artifacts/browser-host/validation.json',import.meta.url),JSON.stringify(report,null,2));
+ console.log(JSON.stringify(report,null,2));await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));
+}

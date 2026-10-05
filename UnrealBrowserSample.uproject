@@ -1,0 +1,7 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Description": "A native Unreal scene and browser GPU capability comparison fixture.",
+  "Modules": [{"Name":"UnrealBrowserSample","Type":"Runtime","LoadingPhase":"Default"},{"Name":"WebCudaTargetPlatform","Type":"Editor","LoadingPhase":"None","PlatformAllowList":["Win64"],"TargetAllowList":["Editor"]},{"Name":"WebCudaTargetPlatformSettings","Type":"Editor","LoadingPhase":"None","PlatformAllowList":["Win64"],"TargetAllowList":["Editor"]},{"Name":"ShaderFormatWebCuda","Type":"Editor","LoadingPhase":"PostConfigInit","PlatformAllowList":["Win64"],"TargetAllowList":["Editor"]}],
+  "Plugins": [{"Name":"PythonScriptPlugin","Enabled":true,"TargetAllowList":["Editor"]},{"Name":"EditorScriptingUtilities","Enabled":true,"TargetAllowList":["Editor"]}]
+}

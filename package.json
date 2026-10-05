@@ -1,0 +1,11 @@
+{
+  "name": "unreal-wasm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "build:browser": "node scripts/build-browser.mjs",
+    "test:browser": "node scripts/test-browser.mjs"
+  },
+  "description": "Experimental Unreal Engine Wasm64 platform and WebGPU rendering integration"
+}

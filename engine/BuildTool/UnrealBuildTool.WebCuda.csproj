@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>UnrealBuildTool</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);1591;SYSLIB0051;SYSLIB0050</NoWarn>
+    <EngineRoot Condition="'$(EngineRoot)'==''">D:/UnrealEngine/UE_5.8</EngineRoot>
+    <UBTSource>$(EngineRoot)/Engine/Source/Programs/UnrealBuildTool</UBTSource>
+    <UBTBinaries>$(EngineRoot)/Engine/Binaries/DotNET/UnrealBuildTool</UBTBinaries>
+    <OutputPath>../artifacts/source-engine/Engine/Binaries/DotNET/UnrealBuildTool/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <!-- Compile Epic's installed UBT sources in place. Reference its existing
+       dependencies; do not replace the installed UBT or fetch exporter code. -->
+  <ItemGroup>
+    <Compile Include="$(UBTSource)/**/*.cs" Exclude="$(UBTSource)/obj/**/*.cs;$(UBTSource)/bin/**/*.cs;$(UBTSource)/System/FileHashCache.cs" />
+    <Compile Include="../artifacts/ubt-source/FileHashCache.cs" />
+    <Compile Include="$(EngineRoot)/Engine/Source/Programs/Shared/MetaData.cs" />
+    <Compile Include="$(EngineRoot)/Engine/Platforms/*/Source/Programs/UnrealBuildTool/**/*.cs" Exclude="$(EngineRoot)/Engine/Platforms/WebCuda/Source/Programs/UnrealBuildTool/**/*.cs" />
+    <Compile Include="../Platforms/WebCuda/Source/Programs/UnrealBuildTool/**/*.cs" />
+    <Reference Include="$(UBTBinaries)/*.dll" Exclude="$(UBTBinaries)/UnrealBuildTool.dll" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+ "schema":1,
+ "engine":"Unreal Engine 5.8.2",
+ "profiles":[
+  {"name":"Native","status":"implemented","kind":"Unreal editor game runtime","script":"scripts/native.ps1","rendering":"DX12 SM6; Nanite mesh assets; Lumen hardware ray tracing configured","packagedShippingBuild":false},
+  {"name":"Web Assembly (Default Unreal)","status":"blocked-no-engine-web-target","reason":"The installed stock UE 5.8.2 has no WebAssembly platform/RHI/exporter. A standalone Wasm scene fixture with WebGPU is available as a prerequisite probe; it is not an Unreal export.","prototype":"scripts/launch.ps1 WebAssembly"},
+  {"name":"Custom Version","status":"gpu-bridge-prototype","prototype":"scripts/launch.ps1 Custom","implemented":["C++ fixture compiled to Wasm","native CUDA shared buffers","OptiX scene and shadow traversal","64-bit atomic tests"],"enginePortImplemented":false,"naniteInBrowser":false,"lumenInBrowser":false,"dlssInSample":false}
+ ]
+}

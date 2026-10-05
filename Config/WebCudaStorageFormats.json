@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "shaders": [
+    {
+      "source": "/Engine/Private/Lumen/LumenScreenProbeGather.usf",
+      "entry": "ScreenProbeIntegrateCS",
+      "formats": {
+        "RWDiffuseIndirect": "r11f_g11f_b10f",
+        "RWLightIsMoving": "r8",
+        "RWRoughSpecularIndirect": "r11f_g11f_b10f"
+      }
+    }
+  ]
+}
